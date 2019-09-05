@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const webpack = require("webpack");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const nodeExternals = require("webpack-node-externals");
@@ -29,6 +29,10 @@ module.exports = {
   devtool: "#source-map",
   module: {
     rules: [
+      {
+        test: /\.md$/,
+        use: "raw-loader"
+      },
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
@@ -64,6 +68,45 @@ module.exports = {
             }
           }
         ]
+      },
+      {
+        // 编译less
+        test: /\.less$/,
+        use: [
+          {
+            loader: "style-loader"
+          },
+          {
+            loader: "css-loader",
+            options: {
+              importLoaders: 1
+            }
+          },
+          {
+            loader: "postcss-loader",
+            options: {
+              ident: "postcss",
+              sourceMap: true,
+              plugins: () => [
+                postcssPresetEnv({
+                  stage: 3,
+                  features: {
+                    "custom-properties": true,
+                    "nesting-rules": true
+                  },
+                  browsers: "last 2 versions"
+                })
+              ]
+            }
+          },
+          {
+            loader: "less-loader",
+            options: {
+              sourceMap: true,
+              javascriptEnabled: true
+            }
+          }
+        ]
       }
     ]
   },
@@ -86,7 +129,7 @@ module.exports = {
   //压缩js
   optimization: {
     minimizer: [
-      new UglifyJsPlugin({
+      new TerserPlugin({
         cache: true,
         parallel: true,
         sourceMap: true

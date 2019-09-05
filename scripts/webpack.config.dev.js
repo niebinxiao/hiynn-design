@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const webpack = require("webpack");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const OptimizeCssAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 const nodeExternals = require("webpack-node-externals");
@@ -18,6 +18,8 @@ module.exports = {
   mode: "development",
   entry: { [name]: "./src/index.js" },
   output: {
+    // 发布到线上要配合 github pages 对应的域名地址
+    publicPath: "/",
     // path: resolve("dist"), // 输出目录
     path: docsDir,
     filename: "static/js/[name].min.js",
@@ -27,9 +29,17 @@ module.exports = {
     libraryTarget: "umd", // 采用通用模块定义
     library: [name]
   },
-  devtool: "#source-map",
+  // 解决预览刷新404问题
+  devServer: {
+    historyApiFallback: true
+  },
+  devtool: "source-map",
   module: {
     rules: [
+      {
+        test: /\.md$/,
+        use: "raw-loader"
+      },
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
@@ -70,6 +80,45 @@ module.exports = {
         ]
       },
       {
+        // 编译less
+        test: /\.less$/,
+        use: [
+          {
+            loader: "style-loader"
+          },
+          {
+            loader: "css-loader",
+            options: {
+              importLoaders: 1
+            }
+          },
+          {
+            loader: "postcss-loader",
+            options: {
+              ident: "postcss",
+              sourceMap: true,
+              plugins: () => [
+                postcssPresetEnv({
+                  stage: 3,
+                  features: {
+                    "custom-properties": true,
+                    "nesting-rules": true
+                  },
+                  browsers: "last 2 versions"
+                })
+              ]
+            }
+          },
+          {
+            loader: "less-loader",
+            options: {
+              sourceMap: true,
+              javascriptEnabled: true
+            }
+          }
+        ]
+      },
+      {
         test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
         use: [
           {
@@ -93,7 +142,8 @@ module.exports = {
     }),
     //预览
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "../public/index.html"), //指定要打包的html路径和文件名
+      favicon: "./public/hd_logo.jpg",
+      template: "./public/index.html", //指定要打包的html路径和文件名
       filename: "./index.html" //指定输出路径和文件名
     }),
     new webpack.HotModuleReplacementPlugin(),
@@ -103,7 +153,7 @@ module.exports = {
   //压缩js
   optimization: {
     minimizer: [
-      new UglifyJsPlugin({
+      new TerserPlugin({
         cache: true,
         parallel: true,
         sourceMap: true
