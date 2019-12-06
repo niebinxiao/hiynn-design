@@ -6,7 +6,7 @@ import HdLayout from "../../components/layout";
 import layoutAction from "../redux/layout/layoutAction";
 import "../../components/layout/style";
 import "../../components/menus/style";
-import "../assets/css/layoutPage.pcss";
+import "../assets/css/layoutPage.scss";
 import logo from "../assets/images/hd_logo.jpg";
 import { Map } from "immutable";
 import routes from "../router";
@@ -19,7 +19,7 @@ const { Search } = Input;
 @withRouter
 @connect(
   ({ layoutReducer }) => ({ layoutReducer }),
-  { saveMenuIndex: layoutAction.saveMenuIndex }
+  { saveMenuIndex: layoutAction.saveMenuIndex, setMenuOpenKeys: layoutAction.setMenuOpenKeys }
 )
 class LayoutContainer extends Component {
   constructor(props) {
@@ -90,6 +90,9 @@ class LayoutContainer extends Component {
   clickMenu = ({ item, key, keyPath }) => {
     this.props.saveMenuIndex(keyPath);
   };
+  openChange = openKeys => {
+    this.props.setMenuOpenKeys(openKeys);
+  };
   toggleCollapse = () => {
     this.setState({
       sider: this.state.sider.set("collapsed", !this.state.sider.get("collapsed"))
@@ -109,6 +112,9 @@ class LayoutContainer extends Component {
     this.props.saveMenuIndex(["1", "4"]);
     this.props.history.push("/docs/introduction");
   };
+  issues = () => {
+    window.location.href = "https://github.com/hiynn-com/hiynn-design/issues";
+  };
   render() {
     const { layoutReducer } = this.props;
     return (
@@ -126,6 +132,10 @@ class LayoutContainer extends Component {
               <div className="menu-item" onClick={() => this.docs()}>
                 <span className="title selected">组件</span>
               </div>
+              <div className="menu-item" onClick={() => this.issues()}>
+                <span className="title">提问</span>
+                <Icon type="exclamation-circle" className="icon" />
+              </div>
               <div className="menu-item">
                 <NavLink to="/about" activeClassName="selected">
                   关于
@@ -138,7 +148,7 @@ class LayoutContainer extends Component {
               </div>
             </div>
             <div className="icon-wrapper">
-              <Icon type="github" style={{ fontSize: "28px" }} onClick={() => this.github()} />
+              <Icon type="github" className="icon-github" onClick={() => this.github()} />
             </div>
           </div>
         </Header>
@@ -148,10 +158,11 @@ class LayoutContainer extends Component {
               className="content-layout-sider-menu"
               mode="inline"
               theme="light"
-              defaultSelectedKeys={[layoutReducer.get("index")]}
+              // defaultSelectedKeys={[layoutReducer.get("index")]}
               selectedKeys={[layoutReducer.get("index")]}
-              defaultOpenKeys={[layoutReducer.get("subIndex")]}
+              openKeys={layoutReducer.get("openKeys").toJS()}
               onClick={this.clickMenu}
+              onOpenChange={this.openChange}
             >
               <Menu.Item key="1">
                 <NavLink to="/docs/introduction">介绍</NavLink>
@@ -162,7 +173,7 @@ class LayoutContainer extends Component {
               <Menu.Item key="3">
                 <NavLink to="/docs/theme">主题设置</NavLink>
               </Menu.Item>
-              <SubMenu key="4" title={<span>组件</span>}>
+              <SubMenu key="4" title={<span>标准化组件</span>}>
                 <Menu.ItemGroup key="g-blog" title="Blog">
                   <Menu.Item key="52">
                     <NavLink to="/docs/components/article">Article</NavLink>
@@ -179,14 +190,14 @@ class LayoutContainer extends Component {
                     <NavLink to="/docs/components/panel">Panel</NavLink>
                   </Menu.Item>
                 </Menu.ItemGroup>
-                <Menu.ItemGroup key="g-code" title="Code">
+                {/* <Menu.ItemGroup key="g-code" title="Code">
                   <Menu.Item key="49">
                     <NavLink to="/docs/components/codearea">CodeArea</NavLink>
                   </Menu.Item>
                   <Menu.Item key="50">
                     <NavLink to="/docs/components/codeZone">CodeZone</NavLink>
                   </Menu.Item>
-                </Menu.ItemGroup>
+                </Menu.ItemGroup> */}
 
                 <Menu.ItemGroup key="g-form" title="Form">
                   <Menu.Item key="43">
@@ -219,6 +230,51 @@ class LayoutContainer extends Component {
                   </Menu.Item>
                   <Menu.Item key="42">
                     <NavLink to="/docs/components/master">Master</NavLink>
+                  </Menu.Item>
+                </Menu.ItemGroup>
+              </SubMenu>
+              <SubMenu key="5" title={<span>可视化组件</span>}>
+                <Menu.ItemGroup key="v-echart" title="Echarts">
+                  <Menu.Item key="v-echart-0">
+                    <NavLink to="/docs/components/echarsTitle">EcharsTitle</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-echart-1">
+                    <NavLink to="/docs/components/Pie">Pie</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-echart-2">
+                    <NavLink to="/docs/components/Line">Line</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-echart-3">
+                    <NavLink to="/docs/components/Bar">Bar</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-echart-4">
+                    <NavLink to="/docs/components/Stack">Stack</NavLink>
+                  </Menu.Item>
+                </Menu.ItemGroup>
+                <Menu.ItemGroup key="v-interaction" title="Interaction">
+                  <Menu.Item key="v-interaction-1">
+                    <NavLink to="/docs/components/ranking">Ranking</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-interaction-2">
+                    <NavLink to="/docs/components/datePicker">DatePicker</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-interaction-3">
+                    <NavLink to="/docs/components/tab">Tab</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-interaction-4">
+                    <NavLink to="/docs/components/dropdown">DropDown</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-interaction-5">
+                    <NavLink to="/docs/components/select">Select</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-interaction-6">
+                    <NavLink to="/docs/components/button">Button</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-interaction-7">
+                    <NavLink to="/docs/components/radio">Radio</NavLink>
+                  </Menu.Item>
+                  <Menu.Item key="v-interaction-8">
+                    <NavLink to="/docs/components/checkboxBar">CheckboxBar</NavLink>
                   </Menu.Item>
                 </Menu.ItemGroup>
               </SubMenu>

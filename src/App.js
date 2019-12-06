@@ -12,8 +12,7 @@ import configureStore, { history } from "./redux/store";
 import LayoutContainer from "./layout/LayoutContainer";
 import RouteViewer from "./layout/RouteViewer";
 import routes from "./router";
-const HomePage = loadable(() => import("./pages/home/index"), { fallback: <Loading /> });
-
+import HomePage from "./pages/home/index";
 const { persistor, store } = configureStore(/* provide initial state if any */);
 
 class App extends Component {
@@ -22,10 +21,14 @@ class App extends Component {
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <ConnectedRouter history={history}>
-            <Switch>
-              <Route path="/" exact component={HomePage} />
-              <Route path="/docs" component={LayoutContainer} />
-            </Switch>
+            {/* <HashRouter> */}
+            <>
+              <Switch>
+                <Route path="/" exact component={HomePage} />
+                <Route path="/docs" component={LayoutContainer} />
+              </Switch>
+            </>
+            {/* </HashRouter> */}
           </ConnectedRouter>
         </PersistGate>
       </Provider>

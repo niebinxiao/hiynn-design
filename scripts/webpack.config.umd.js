@@ -41,41 +41,9 @@ module.exports = {
         }
       },
       {
-        test: /\.(pc|sc|le|c)ss$/,
+        test: /\.css$/,
         use: [
-          MiniCssExtractPlugin.loader,
-          {
-            loader: "css-loader",
-            options: {
-              sourceMap: true
-            }
-          },
-          {
-            loader: "postcss-loader",
-            options: {
-              ident: "postcss",
-              sourceMap: true,
-              plugins: () => [
-                postcssPresetEnv({
-                  stage: 3,
-                  features: {
-                    "custom-properties": true,
-                    "nesting-rules": true
-                  },
-                  browsers: "last 2 versions"
-                })
-              ]
-            }
-          }
-        ]
-      },
-      {
-        // 编译less
-        test: /\.less$/,
-        use: [
-          {
-            loader: "style-loader"
-          },
+          "style-loader",
           {
             loader: "css-loader",
             options: {
@@ -83,27 +51,58 @@ module.exports = {
             }
           },
           {
-            loader: "postcss-loader",
+            loader: "postcss-loader"
+          }
+        ]
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          "style-loader",
+          {
+            loader: "css-loader",
             options: {
-              ident: "postcss",
-              sourceMap: true,
-              plugins: () => [
-                postcssPresetEnv({
-                  stage: 3,
-                  features: {
-                    "custom-properties": true,
-                    "nesting-rules": true
-                  },
-                  browsers: "last 2 versions"
-                })
-              ]
+              importLoaders: 1
             }
+          },
+          {
+            loader: "postcss-loader"
+          },
+          {
+            loader: "sass-loader",
+            options: {}
+          }
+        ]
+      },
+      {
+        // 编译less
+        test: /\.less$/,
+        use: [
+          "style-loader",
+          {
+            loader: "css-loader",
+            options: {
+              importLoaders: 1
+            }
+          },
+          {
+            loader: "postcss-loader"
           },
           {
             loader: "less-loader",
             options: {
-              sourceMap: true,
               javascriptEnabled: true
+            }
+          }
+        ]
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
+        use: [
+          {
+            loader: "url-loader",
+            options: {
+              limit: 8192
             }
           }
         ]

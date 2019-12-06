@@ -11,6 +11,7 @@ const HtmlWebpackInlineSourcePlugin = require("html-webpack-inline-source-plugin
 const postcssPresetEnv = require("postcss-preset-env");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const { version, name, description } = require("../package.json");
+const CopyPlugin = require("copy-webpack-plugin");
 
 const resolve = dir => path.join(__dirname, ".", dir);
 const isProd = process.env.NODE_ENV === "production";
@@ -24,7 +25,8 @@ module.exports = {
   entry: { main: "./src/index.js" },
   output: {
     //配合 github pages 域名设置该路径，如果是本地则用'/'
-    publicPath: "/hiynn-design/",
+    // publicPath: "/hiynn-design/",
+    publicPath: "/",
     // path: resolve("dist"), // 输出目录
     path: docsDir,
     filename: "static/js/[name].min.js",
@@ -42,34 +44,43 @@ module.exports = {
         use: "raw-loader"
       },
       {
-        test: /\.(pc|sc|c)ss$/,
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader"
+        }
+      },
+      {
+        test: /\.css$/,
         use: [
-          MiniCssExtractPlugin.loader,
+          "style-loader",
           {
             loader: "css-loader",
             options: {
-              sourceMap: true,
               importLoaders: 1
             }
           },
           {
-            loader: "postcss-loader",
+            loader: "postcss-loader"
+          }
+        ]
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          "style-loader",
+          {
+            loader: "css-loader",
             options: {
-              ident: "postcss",
-              sourceMap: true,
-              plugins: () => [
-                require("postcss-apply"),
-                postcssPresetEnv({
-                  stage: 3,
-                  features: {
-                    "custom-properties": true,
-                    "nesting-rules": true,
-                    "color-mod-function": { unresolved: "warn" }
-                  },
-                  browsers: "last 2 versions"
-                })
-              ]
+              importLoaders: 1
             }
+          },
+          {
+            loader: "postcss-loader"
+          },
+          {
+            loader: "sass-loader",
+            options: {}
           }
         ]
       },
@@ -77,9 +88,7 @@ module.exports = {
         // 编译less
         test: /\.less$/,
         use: [
-          {
-            loader: "style-loader"
-          },
+          "style-loader",
           {
             loader: "css-loader",
             options: {
@@ -87,37 +96,15 @@ module.exports = {
             }
           },
           {
-            loader: "postcss-loader",
-            options: {
-              ident: "postcss",
-              sourceMap: true,
-              plugins: () => [
-                postcssPresetEnv({
-                  stage: 3,
-                  features: {
-                    "custom-properties": true,
-                    "nesting-rules": true
-                  },
-                  browsers: "last 2 versions"
-                })
-              ]
-            }
+            loader: "postcss-loader"
           },
           {
             loader: "less-loader",
             options: {
-              sourceMap: true,
               javascriptEnabled: true
             }
           }
         ]
-      },
-      {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader"
-        }
       },
       {
         test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
@@ -161,6 +148,7 @@ module.exports = {
       //指定输出路径和文件名
       filename: "./404.html"
     }),
+    new CopyPlugin([{ from: "./public/CNAME", to: "." }]),
     new InlineManifestWebpackPlugin(),
     new HtmlWebpackInlineSourcePlugin(),
     new webpack.HotModuleReplacementPlugin(),
